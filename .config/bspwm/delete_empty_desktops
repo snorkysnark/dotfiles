@@ -1,4 +1,5 @@
 #!/usr/bin/fish
+
 function delete_if_matching
     set -l desktop $argv[1]
     set -l condition $argv[2]

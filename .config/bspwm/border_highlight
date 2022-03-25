@@ -1,5 +1,9 @@
 #!/usr/bin/fish
 
+# Focused non-window nodes are highlighted with $BSPC_BORDER_COLOR,
+# Marked nodes are highlighted with $BSPC_MARKED_BORDER_COLOR
+# Otherwise, hide the border
+
 function reset_border
     bspc query -N -n '.window' | while read wid
         if bspc query -N -n "$wid#any.marked.ancestor_of"

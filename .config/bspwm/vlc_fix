@@ -1,5 +1,7 @@
 #! /bin/sh
 
+# Exrternal rule to fix vlc control panel in fullscreen
+
 wid=$1
 class=$2
 instance=$3
