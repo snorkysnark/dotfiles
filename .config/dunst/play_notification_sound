@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+aplay $HOME/.config/dunst/ding.wav

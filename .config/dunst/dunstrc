@@ -1,0 +1,39 @@
+[global]
+follow = keyboard
+width = 300
+height = 500
+offset = 10x20
+alignment = right
+padding = 10
+horizontal_padding = 10
+transparency = 40
+word_wrap = true
+progress_bar_frame_width = 0
+progress_bar_max_width = 500
+frame_width = 0
+
+[urgency_normal]
+highlight = "#72cbcb"
+background = "#f9ffff"
+foreground = "#220b0f"
+
+[urgency_low]
+highlight = "#72cbcb"
+background = "#f9ffff"
+foreground = "#220b0f"
+timeout = 3
+
+[urgency_critical]
+background = "#D968A2"
+foreground = "#220b0f"
+timeout = 0
+
+[sound]
+summary = "*"
+msg_urgency = normal
+script = ~/.config/dunst/play_notification_sound
+
+[sound-critical]
+summary = "*"
+msg_urgency = critical
+script = ~/.config/dunst/play_notification_sound
