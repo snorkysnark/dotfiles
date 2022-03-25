@@ -1,0 +1,1 @@
+/home/lisk/.config/lf/lf.fish
