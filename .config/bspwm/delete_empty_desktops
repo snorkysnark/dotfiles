@@ -1,0 +1,27 @@
+#!/usr/bin/fish
+function delete_if_matching
+    set -l desktop $argv[1]
+    set -l condition $argv[2]
+
+    if bspc query -D -d "$desktop$condition"> /dev/null
+        bspc desktop $desktop -r
+    end
+end
+
+bspc subscribe desktop_focus node_remove node_transfer desktop_swap | while read -d ' ' event data
+    switch $event
+        case 'desktop_focus' 'desktop_swap'
+            # Delete all empty desktops
+            # last desktop is skipped if it's also active
+            for monitor in (bspc query -M)
+                set -l desktop_list (bspc query -D -m $monitor)
+                for desktop in $desktop_list[..-2]
+                   delete_if_matching $desktop '.!occupied'
+                end
+                delete_if_matching $desktop_list[-1] '.!active.!occupied'
+            end
+        case 'node_remove' 'node_transfer'
+            echo $data | read -d ' ' _ desktop_id _
+            delete_if_matching $desktop_id '.!occupied'
+    end
+end

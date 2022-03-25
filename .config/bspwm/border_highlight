@@ -1,0 +1,31 @@
+#!/usr/bin/fish
+
+function reset_border
+    bspc query -N -n '.window' | while read wid
+        if bspc query -N -n "$wid#any.marked.ancestor_of"
+            bspc config -n $wid border_width $BSPC_HIGHLIGHT_BORDER_WIDTH
+
+            if bspc query -N -n "focused#$wid.descendant_of"
+                chwb -c "0x$BSPC_MARKED_FOCUSED_BORDER_COLOR" $wid
+            else
+                chwb -c "0x$BSPC_MARKED_BORDER_COLOR" $wid
+            end
+        else
+            bspc config -n $wid border_width $BSPC_DEFAULT_BORDER_WIDTH
+
+            chwb -c "0x$BSPC_BORDER_COLOR" $wid
+        end
+    end
+    bspc config -n 'focused.!window' border_width $BSPC_HIGHLIGHT_BORDER_WIDTH 
+end
+
+bspc subscribe node_focus node_flag | while read -d ' ' event data
+	if [ $event = 'node_focus' ]
+        reset_border
+    else
+        echo $data | read -d ' ' _ _ _ flag _
+        if [ $flag = 'marked' ]
+            reset_border
+        end
+    end
+end

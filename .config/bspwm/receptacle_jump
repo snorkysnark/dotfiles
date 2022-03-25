@@ -1,0 +1,22 @@
+#!/usr/bin/fish
+bspc subscribe node_add node_transfer | while read -d ' ' event data
+    if [ $event = 'node_add' ]
+        #New node should jump to receptacle if not floating
+        echo $data | read -d ' ' _ _ _ nid
+
+        if not bspc query -N -n "$nid.floating"
+            bspc node $nid -n "$nid#any.local.leaf.!window" --follow || true
+        end
+    else
+        #Jump to receptacle if transferring to another desktop
+        echo $data | read -d ' ' _ src_desktop nid _ dst_desktop dst_nid
+
+        if [ $src_desktop = $dst_desktop ]
+            continue
+        end
+
+        if not bspc query -N -n "$nid.floating"
+            bspc node $nid -n "$dst_nid#any.local.leaf.!window" --follow || true
+        end
+    end
+end
