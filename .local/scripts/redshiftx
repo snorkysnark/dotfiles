@@ -1,0 +1,45 @@
+#!/usr/bin/fish
+
+set CONFIG_FOLDER "$HOME/.config/redshiftx"
+set RANGE_FILE "$CONFIG_FOLDER/range"
+set VALUE_FILE '/tmp/redshiftx'
+
+if not test -d $CONFIG_FOLDER
+  mkdir $CONFIG_FOLDER
+  echo '1000 8000' > {$CONFIG_FOLDER}'/range'
+end
+echo '4000 false' > $VALUE_FILE
+
+string split ' ' (cat $RANGE_FILE) | read -L min_value max_value
+
+function apply
+  if [ "$argv[2]" = "true" ]
+    redshift -P -O $argv[1] -g 1.1:0.9:0.9
+  else
+    redshift -x
+  end
+end
+
+function normalize_value
+  math "($argv[1] - $min_value) / ($max_value - $min_value) * 100"
+end
+
+function show_notification
+  if [ "$argv[2]" = "true" ]
+    notify-bar -n Redshift -t redshift -v $argv[1]
+  else
+    notify-bar -n Redshift -t redshift -v $argv[1] -d ВЫКЛ
+  end
+end
+
+function apply_from_file
+  string split ' ' (cat $argv[1]) | read -L value enabled
+  apply $value $enabled
+
+  show_notification (normalize_value $value) $enabled
+end
+
+while true
+  inotifywait -e modify $VALUE_FILE
+  apply_from_file $VALUE_FILE
+end

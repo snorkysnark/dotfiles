@@ -1,0 +1,20 @@
+#!/usr/bin/fish
+
+argparse --name=notify_bar 'n/name=' 't/tag=' 'v/value=' 'd/display-value=' -- $argv
+
+if set -q _flag_tag; and set -q _flag_value
+  if not set -q _flag_name
+    set _flag_name $_flag_tag
+  end
+  set _flag_value (echo $_flag_value | sed 's/\.[0-9]*//')
+  if not set -q _flag_display_value
+    set _flag_display_value (echo {$_flag_value}'%')
+  end
+
+
+  dunstify {$_flag_name}': '{$_flag_display_value} -h 'string:x-dunst-stack-tag:'{$_flag_tag} -h 'int:value:'{$_flag_value} -u low
+else
+  echo 'Usage: notify-bar -n/name= -t/tag= -v/value= [-d/display-value=]'
+  exit 1
+end
+

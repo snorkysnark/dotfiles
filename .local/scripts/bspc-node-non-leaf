@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+
+if bspc query -N -n focused.leaf >/dev/null; then
+	echo '@/'
+else
+	echo 'focused'
+fi

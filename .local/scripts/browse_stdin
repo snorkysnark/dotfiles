@@ -1,0 +1,5 @@
+#!/usr/bin/fish
+
+set file (mktemp --suffix .html)
+cat - > $file
+$BROWSER $file & disown

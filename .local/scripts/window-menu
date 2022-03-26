@@ -1,0 +1,26 @@
+#!/usr/bin/fish
+
+set -l choice (printf 'Закрыть\tclose\nFloating\tfloating\nTiled\ttiled\nPseudo Tiled\tpseudotiled\nПолный экран\tfullscreen\nMonocle\tmonocle\nReceptacle\treceptacle' | xmenu)
+
+switch $choice
+	case 'close'
+		bspc node -c
+	case 'floating'
+		bspc node -t floating
+	case 'tiled'
+		bspc node -t tiled
+	case 'pseudotiled'
+		bspc node -t pseudo_tiled
+	case 'fullscreen'
+		bspc node -t ~fullscreen
+	case 'monocle'
+		bspc desktop --layout next
+	case 'receptacle'
+		set -l choice (printf '+\tadd\n-\tfill' | xmenu)
+		switch $choice
+			case 'add'
+				bspc node -i
+			case 'fill'
+				bspc node -n any.local.leaf.!window.!descendant_of
+		end
+end

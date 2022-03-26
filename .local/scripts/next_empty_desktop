@@ -1,0 +1,11 @@
+#!/usr/bin/bash
+
+MONITOR=${1:-focused}
+
+LAST_DESKTOP=$(bspc query -D -m $MONITOR | tail -1)
+if bspc query -D -d "$LAST_DESKTOP.occupied" >/dev/null; then
+    bspc monitor $MONITOR -a Desktop
+    bspc query -D -m $MONITOR| tail -1
+else
+    echo $LAST_DESKTOP
+fi

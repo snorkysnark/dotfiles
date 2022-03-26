@@ -1,0 +1,38 @@
+#!/usr/bin/fish
+
+set RANGE_FILE "$HOME/.config/redshiftx/range"
+set VALUE_FILE '/tmp/redshiftx'
+
+string split ' ' (cat $VALUE_FILE) | read -g -L value enabled
+string split ' ' (cat $RANGE_FILE) | read -L min_value max_value
+
+function toggle
+    if [ $enabled = "true" ]
+      set -g enabled "false"
+    else
+      set -g enabled "true"
+    end
+end
+
+switch $argv[1]
+  case toggle
+    toggle
+  case inc
+    set enabled "true"
+    set value (math $value + $argv[2])
+  case dec
+    set -g enabled "true"
+    set value (math $value - $argv[2])
+  case set
+    set value $argv[2]
+  case '*'
+    exit 1
+end
+
+if [ $value -lt $min_value ]
+  set value $min_value
+else if [ $value -gt $max_value ]
+  set value $max_value
+end
+
+echo {$value}' '{$enabled} > $VALUE_FILE

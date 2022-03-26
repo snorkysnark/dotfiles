@@ -1,0 +1,12 @@
+#!/usr/bin/fish
+
+set desired_width $argv[1]
+set desired_height $argv[2]
+
+if bspc query -N -n focused.leaf
+    bspc node -t pseudo_tiled
+    bspc query -T -n | jq '.client.tiledRectangle | .width, .height' | \
+        read -L width height
+
+    bspc node -z bottom_right (math "$desired_width - $width") (math "$desired_height - $height")
+end

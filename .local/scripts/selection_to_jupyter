@@ -1,0 +1,17 @@
+#!/usr/bin/python
+from jupyter_client import AsyncKernelManager, find_connection_file
+
+connection_file = find_connection_file("kernel-*.json")
+kernel_manager = AsyncKernelManager(connection_file=connection_file)
+
+kernel_manager.load_connection_file()
+km_client = kernel_manager.client()
+
+km_client.execute(
+"""
+import subprocess
+from parsel import Selector
+text = subprocess.run(['xclip', '-o'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+sel = Selector(text)
+"""
+)

@@ -1,0 +1,16 @@
+#!/usr/bin/fish
+
+set -l choice (printf 'Logout\nShutdown\nReboot\nReboot to Windows\nHibernate' | rofi -dmenu -i -monitor -1)
+
+switch $choice
+    case 'Logout'
+    bspc quit
+    case 'Shutdown'
+    shutdown now
+    case 'Reboot'
+    reboot
+    case 'Reboot to Windows'
+    sudo win_reboot && reboot
+    case 'Hibernate'
+    systemctl hibernate
+end

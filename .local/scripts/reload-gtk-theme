@@ -1,0 +1,27 @@
+#!/usr/bin/python
+from configparser import ConfigParser
+import tempfile
+import os
+import subprocess
+from pathlib import Path
+
+
+def xsettingsd(theme):
+    """Call xsettingsd with a tempfile to trigger a reload of the GTK3 theme"""
+    fd, path = tempfile.mkstemp()
+
+    try:
+        with os.fdopen(fd, "w+") as tmp:
+            tmp.write('Net/ThemeName "' + theme + '"\n')
+            tmp.close()
+
+            subprocess.call(["timeout", "0.2s", "xsettingsd", "-c", path])
+    finally:
+        os.remove(path)
+
+
+settings_ini = Path.home().joinpath(".config/gtk-3.0/settings.ini")
+gtkrc = ConfigParser()
+gtkrc.read(settings_ini)
+theme = gtkrc["Settings"].get("gtk-theme-name")
+xsettingsd(theme)

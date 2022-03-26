@@ -1,0 +1,4 @@
+#!/usr/bin/fish
+
+set date (date '+%Y.%m.%d-%H:%M')
+pg_dump $argv > "$argv[-1]-$date.sql"

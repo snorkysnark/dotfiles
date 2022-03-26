@@ -1,0 +1,7 @@
+#!/usr/bin/fish
+
+bspc node $WINDOWID --flag hidden=on
+
+sh -c "$argv"
+
+bspc node $WINDOWID --flag hidden=off
