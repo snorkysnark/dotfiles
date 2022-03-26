@@ -1,0 +1,105 @@
+set shell sh
+set shellopts '-eu' #Exit or error + warn of unset variables
+set ifs "\n" #Internal field separator for $fx
+
+set icons
+set mouse
+set previewer ~/.config/lf/preview.fish
+set cleaner ~/.config/lf/clear.fish
+%{{mkdir -p "$HOME/.cache/lf"}}
+
+cmd open %{{
+  test -L $f && f=$(readlink -f $f) #Resolve symlinks
+  case $(file --mime-type $f -b) in
+    #text/csv) lf -remote "send $id \$vd \$fx";; #CSV viewer
+    text/csv) for f in $fx; do setsid $OPENER $f > /dev/null 2> /dev/null & done;;
+    text/* | application/json | inode/x-empty) lf -remote "send $id \$\$EDITOR \$fx";; #Terminal editor
+    *) for f in $fx; do setsid $OPENER $f > /dev/null 2> /dev/null & done;;
+  esac
+}}
+
+cmd on-cd %{{
+    loc_file="$HOME/.local/share/lf/locations"
+    { cat $loc_file 2>/dev/null & echo $PWD; } |\
+        awk '!a[$0]++' | head -n 500 | sponge $loc_file
+}}
+cmd locations ${{
+    location=$(cat "$HOME/.local/share/lf/locations" | fzf)
+    if [ $? -eq 0 ]; then
+        lf -remote "send $id cd '$location'"
+    fi
+}}
+map R locations
+
+map b $bat -p --paging=always $f
+map Se $sudoedit $f
+
+map <m-down> down
+map <m-up> up
+
+map x %garbage put $fx #Trash
+map X push %rm<space>-rf<space>$fx
+
+map m #unmap m
+map M mark-save
+
+cmd mkdir %{{
+  IFS=" "
+  mkdir -p -- "$*"
+  lf -remote "send $id select \"$*\""
+}}
+cmd touch %{{
+  IFS=" "
+  touch -- "$*"
+  lf -remote "send $id select \"$*\""
+}}
+map md push :mkdir<space>
+map mf push :touch<space>
+
+cmd toggle-exec %{{
+  [ -x $f ] && chmod -x $f || chmod +x $f
+  lf -remote "send $id reload"
+}}
+map E toggle-exec
+
+cmd follow-link %{{
+  real_path=$(readlink -f $f)
+  lf -remote "send $id cd \"$(dirname $real_path)\""
+  lf -remote "send $id select \"$(basename $real_path)\""
+}}
+map L follow-link
+map <c-o> push ''
+
+map <enter> $run kitty -d "'$PWD'" #Open terminal
+map <a-f> $eat thunar
+map <c-v> $$EDITOR
+
+map a %{{
+  if [ "$lf_ratios" = "1" ]; then
+    lf -remote "send $id set ratios 1:2:3"
+    lf -remote "send $id set preview"
+  else
+    lf -remote "send $id set nopreview"
+    lf -remote "send $id set ratios 1"
+  fi
+}}
+
+cmd copy-path ${{
+    echo -n "$fx" | xclip -sel clip
+}}
+map Y copy-path
+
+cmd fzf ${{
+   SELECTED=$(fd --color always | fzf --ansi --preview="bat -p --color always {}") 
+    if [ $? -eq 0 ]; then
+        if [[ -d "$SELECTED" ]]; then
+            lf -remote "send $id cd '$SELECTED'"
+        elif [[ -f "$SELECTED" ]]; then
+            lf -remote "send $id cd '$(dirname $SELECTED)'"
+            lf -remote "send $id select '$(basename $SELECTED)'"
+        fi
+    fi
+}}
+map Z fzf
+
+map <c-g> $lazygit

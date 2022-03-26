@@ -1,0 +1,39 @@
+source ~/.config/lf/lfrc
+
+map e %{{
+  echo "e $f" > $NVIM_COMMANDS
+  lf -remote "send $id quit"
+}}
+
+cmd open %{{
+  test -L $f && f=$(readlink -f $f) #Resolve symlinks
+  case $(file --mime-type $f -b) in
+    text/* | application/json | inode/x-expty)
+      echo "e $f" > $NVIM_COMMANDS
+      lf -remote "send $id quit"
+      ;; #Open in parent vim
+    *) for f in $fx; do setsid $OPENER $f > /dev/null 2> /dev/null & done;; #xdg-open & disown
+  esac
+}}
+
+cmd vim-open %{{
+  for f in $fx; do
+    echo "$1 $f" >> $NVIM_COMMANDS
+  done
+  lf -remote "send $id quit"
+}}
+
+map <c-t> vim-open tabe
+map <c-x> vim-open split
+map <c-v> vim-open vsplit
+
+cmd vim-pwd %{{
+  echo "$1 $PWD" >> $NVIM_COMMANDS
+  lf -remote "send $id quit"
+}}
+
+map w
+map W $$SHELL
+map ww vim-pwd cd
+map wt vim-pwd tcd
+map wl vim-pwd lcd
