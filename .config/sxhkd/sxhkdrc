@@ -1,0 +1,270 @@
+# vim: set foldmethod=marker:
+
+#{{{ System
+### Reload SXHKD
+super + ctrl + r
+	pkill -USR1 -x sxhkd && notify-send -u low 'Reloaded SXHKD'
+
+### Restart Picom
+super + ctrl + p; super + ctrl + p
+	(pkill picom && sleep 0.1); picom
+
+### Restart Picom (no config)
+super + ctrl + p; super + ctrl + 0
+	(pkill picom && sleep 0.1); picom --config /dev/null
+
+### Power Menu
+super + x
+	power_menu
+
+### Switch to english
+~Escape
+	xkb-switch -s us
+
+### Mouse menu
+button8
+	bspc node -f pointed && window-menu
+
+### Screenshot
+Print
+	flameshot gui
+
+ctrl + KP_Down
+	flameshot gui
+
+#}}}
+#{{{ Apps
+### Kitty
+super + Return
+	kitty
+
+Menu
+	kitty
+
+### Browser
+super + alt + {_,ctrl + }b
+	firefox {_,--private-window}
+
+### Rofi
+super + {_,shift + }d
+    rofi -monitor -1 -show-icons -show {drun,window}
+
+### Clipboard History
+super + ctrl + c
+	clipcat-menu
+#}}}
+#{{{ Window Nodes
+
+### Close/Kill
+super + {_, ctrl + }q
+	bspc node -{c,k}
+
+### Close all nodes on desktop
+super + shift + q
+    bspc node '@/' -c
+
+### Arrow Navigation
+super + {h,j,k,l}
+	bspc node -f {west,south,north,east}
+
+super + {Left,Down,Up,Right}
+	bspc node -f {west,south,north,east}
+
+### Next/prev local node
+super + {_,shift + }n
+	bspc node -f {next,prev}.local.window.leaf.!hidden
+
+### Swap with adjacent node
+super + shift + {h,j,k,l}
+	bspc node -s {west,south,north,east} --follow
+
+### Move inside adjacent node
+super + ctrl + {h,j,k,l}
+	bspc node -n {west,south,north,east} --follow
+
+### Move to next monitor
+super + shift + m
+	bspc node -m next --follow
+
+### Move to nth desktop
+super + shift + {1-9,0}
+	bspc node -d 'focused:^{1-9,10}' --follow
+
+### Move to next/prev desktop
+super + shift + {grave,Tab}
+	bspc node -d {prev,next} --follow
+
+### Move to next empty desktop
+super + {shift + a,alt + m}
+    bspc node -d $(next_empty_desktop {focused,next}) --follow
+
+### Fullscreen
+super + F11
+	bspc node -t ~fullscreen
+
+### Tiled/Pseudo Tiled
+super + t
+    if bspc query -N -n focused.tiled; then \
+        bspc node -t pseudo_tiled; \
+    else \
+        bspc node -t tiled; \
+    fi
+
+### Set nontransparent
+super + alt + t
+    WIN_ID=$(bspc query -N -n focused.window) && \
+    if [[ $(xprop PICOM_NONTRANSPARENT -id $WIN_ID) = 'PICOM_NONTRANSPARENT(STRING) = "1"' ]]; then \
+        xprop -remove PICOM_NONTRANSPARENT -id $WIN_ID; \
+        notify-send 'Transparency: ON' -h 'string:x-dunst-stack-tag:picom-transparency' -u low; \
+    else \
+        xprop -f PICOM_NONTRANSPARENT 8s -set PICOM_NONTRANSPARENT 1 -id $WIN_ID; \
+        notify-send 'Transparency: OFF' -h 'string:x-dunst-stack-tag:picom-transparency' -u low; \
+    fi
+
+### Mark
+super + apostrophe
+	bspc node -g marked
+
+### Swap with marked
+super + shift + apostrophe
+	LAST_MARKED=`bspc query -N -n last.marked`; \
+	bspc node $LAST_MARKED -g marked=off; \
+	bspc node -s $LAST_MARKED; \
+	bspc node -f $LAST_MARKED
+
+### Paste marked
+super + ctrl + apostrophe
+	LAST_MARKED=`bspc query -N -n last.marked`; \
+	bspc node $LAST_MARKED -g marked=off; \
+	bspc node $LAST_MARKED -n focused || bspc node $LAST_MARKED -d focused; \
+	bspc node -f $LAST_MARKED
+#}}}
+#{{{ Non-Window Nodes
+
+### Insert Receptacle
+super + i
+	bspc node -i
+
+### Fill Receptacle
+super + shift + i
+	bspc node -n any.local.leaf.!window.!descendant_of
+
+### Select Parent
+super + {_, shift + }p
+	bspc node -f @{parent,/}
+
+### Select last window node
+super + BackSpace
+	bspc node -f last.window.local || bspc node -f any.window.descendant_of
+
+### Rotate
+super + {bracketleft,bracketright}
+	bspc node $(bspc-node-non-leaf) -R {-90,90}
+
+### Circulate
+super + shift + {bracketright,bracketleft}
+	bspc node $(bspc-node-non-leaf) -C {backward,forward}
+
+### Flip
+super + {equal,backslash}
+	bspc node $(bspc-node-non-leaf) -F {horizontal,vertical}
+#}}}
+#{{{ Preseletion
+
+### New Preseletion
+super + s; super + {h,j,k,l}
+	bspc node -p {west,south,north,east}
+
+### Close Preseletion
+super + s; super + s
+	bspc node -p cancel
+
+#}}}
+#{{{ Monitor
+
+### Next Monitor
+super + m
+	bspc monitor -f next
+
+### Toggle polybar
+super + alt + p
+    if [[ $(bspc config -m focused top_padding) = '0' ]]; then \
+        bspc config -m focused top_padding 20; \
+    else \
+        bspc config -m focused top_padding 0; \
+    fi
+
+#}}}
+#{{{ Desktop
+
+### New Desktop
+super + a
+    bspc desktop -f $(next_empty_desktop)
+
+super + alt + q
+    bspc desktop -r
+
+### Next/prev local desktop
+super + {grave,Tab}
+	bspc desktop -f {prev,next}.local
+
+### Nth local desktop
+super + {1-9,0}
+	bspc desktop -f 'focused:^{1-9,10}'
+
+### Swap active desktops
+super + ctrl + m
+	bspc desktop -s next:focused --follow
+
+### Swap with next/prev desktop
+super + shift + {comma,period}
+	bspc desktop -s {prev,next}.local --follow
+
+### Toggle telescope layout
+super + y
+	bspc desktop --layout next
+
+#}}}
+#{{{ Media
+
+### Volume
+XF86Audio{Lower,Raise}Volume
+	pactl set-sink-volume @DEFAULT_SINK@ {-,+}2%
+
+super + {button5,button4}
+	pactl set-sink-volume @DEFAULT_SINK@ {-,+}5%
+
+### Mute
+XF86AudioMute
+	pactl set-sink-mute @DEFAULT_SINK@ toggle
+
+### Brighness (builtin)
+XF86MonBrightness{Down,Up}
+	brillo -s intel_backlight -{U,A} 5
+    
+ctrl + XF86Audio{Lower,Raise}Volume
+	brillo -s intel_backlight -{U,A} 5
+
+### Brighness (HDMI)
+alt + XF86Audio{Lower,Raise}Volume
+	brillo -s ddcci3 -{U,A} 5
+
+### Brighness (both)
+ctrl + alt + XF86Audio{Lower,Raise}Volume
+	brillo -s intel_backlight -{U,A} 5; \
+	brillo -s ddcci3 -S $(brillo intel_backlight)
+
+### Redshift
+shift + XF86Audio{Lower,Raise}Volume 
+	redshiftx-change {dec,inc} 200
+
+### Redshift (toggle)
+shift + XF86AudioMute
+	redshiftx-change toggle
+
+#}}}
+
+#{{{ Layout
+super + space; super + h
+    set-pseudo-tiled-size 960 1080
+}}}
